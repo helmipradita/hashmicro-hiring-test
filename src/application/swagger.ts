@@ -19,7 +19,7 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: "http://hashmicro.helmipradita.dev/api",
+        url: "https://hashmicro.helmipradita.dev/api",
         description: "Production Server",
       },
     ],
