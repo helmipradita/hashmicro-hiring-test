@@ -19,7 +19,7 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: "http://localhost:3000/api",
+        url: "http://localhost:8081/api",
         description: "Local Development Server",
       },
     ],
@@ -202,7 +202,7 @@ const options: swaggerJsdoc.Options = {
       },
     },
   },
-  apis: ["./src/route/*.ts"],
+  apis: ["./src/route/*.ts", "./dist/route/*.js"],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);

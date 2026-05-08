@@ -2,6 +2,7 @@ node_modules
 dist
 .env
 .git
+.gitignore
 *.md
 test
 doc
@@ -10,3 +11,4 @@ test-all-endpoints.http
 .claude
 jest.config.js
 Dockerfile.dev
+docker-compose.yml

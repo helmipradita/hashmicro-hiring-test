@@ -6,10 +6,11 @@ COPY package*.json ./
 RUN npm ci
 
 COPY prisma ./prisma/
-RUN npx prisma generate
-
 COPY tsconfig.json ./
 COPY src ./src/
+
+ENV DATABASE_URL="mysql://root:root@host.docker.internal:3306/hashmicro_hiring_test"
+ENV PORT=8081
 
 EXPOSE 8081
 

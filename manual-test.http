@@ -1,5 +1,5 @@
 ### Variables
-@baseUrl = http://localhost:3000/api
+@baseUrl = http://localhost:8081/api
 @token = 72b1e62d-9348-43b4-9caa-bddd67df7772
 
 ### Register

@@ -8,6 +8,10 @@ import { swaggerSpec } from "./swagger";
 export const web = express();
 web.use(express.json());
 
+web.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 // Swagger UI
 web.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

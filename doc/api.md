@@ -1,6 +1,12 @@
 # API Documentation
 
-Base URL: `http://localhost:8081`
+## Base URL
+
+| Environment | URL |
+|-------------|-----|
+| Docker (via Nginx) | http://localhost |
+| Docker (Direct) | http://localhost:8081 |
+| Local (npm run dev) | http://localhost:8081 |
 
 ## Authentication
 
@@ -190,8 +196,8 @@ Content-Type: application/json
 | email | string | Yes | Valid email format |
 | phone | string | Yes | Max 20 chars |
 | salary | number | Yes | Must be positive |
-| department | string | Yes | Engineering, HR, Sales, Marketing, Operations |
-| position | string | Yes | Junior, Senior, Lead, Manager |
+| department | string | Yes | Engineering, HR, Sales, Marketing, Operations, Finance |
+| position | string | Yes | Intern, Junior, Middle, Senior, Lead, Manager |
 
 **Example:**
 ```json
@@ -226,7 +232,7 @@ Content-Type: application/json
 ### List Employees
 
 ```http
-GET /api/employees?page=1&size=10&name=John&department=Engineering
+GET /api/employees?page=1&size=10&name=John&department=Engineering&position=Senior&email=john
 X-API-TOKEN: <token>
 ```
 
@@ -238,6 +244,8 @@ X-API-TOKEN: <token>
 | size | number | No | Default: 10, Max: 100 |
 | name | string | No | Search by first_name or last_name |
 | department | string | No | Filter by department |
+| position | string | No | Filter by position |
+| email | string | No | Search by email |
 
 **Response 200:**
 ```json
@@ -254,11 +262,11 @@ X-API-TOKEN: <token>
       "position": "Senior"
     }
   ],
-  "meta": {
-    "page": 1,
+  "paging": {
+    "current_page": 1,
+    "total_page": 1,
     "size": 10,
-    "total": 1,
-    "totalPages": 1
+    "total_data": 1
   }
 }
 ```
@@ -382,28 +390,10 @@ Content-Type: application/json
 
 **Salary Calculation Logic:**
 
-```mermaid
-flowchart TD
-    A[Input: Base Salary] --> B{Annual Salary > 60M?}
-    B -->|Yes| C[Apply Progressive Tax]
-    B -->|No| D[Tax = 0]
-    C --> E{Check Bonus Eligibility}
-    E -->|Salary >= 10M| F[Bonus = 18% of Base]
-    E -->|Salary >= 5M| G[Bonus = 15% of Base]
-    E -->|Otherwise| H[Bonus = 10% of Base]
-    F --> I[Calculate Deductions]
-    G --> I
-    H --> I
-    I --> J[Deductions = 4% of Base]
-    J --> K[Net Salary = Base + Bonus - Tax - Deductions]
-    K --> L[Save to Database]
-```
-
-**Calculation Details:**
-
-- **Bonus**: 18% (>=10M), 15% (>=5M), 10% (<5M)
+- **Bonus Rate**: Based on department and position
 - **Tax**: Progressive based on annual salary
-- **Deductions**: 4% of base salary
+- **Deductions**: Fixed percentage of base salary
+- **Net Salary**: Base + Bonus - Tax - Deductions
 
 **Response 200:**
 ```json
@@ -448,7 +438,7 @@ X-API-TOKEN: <token>
 
 ---
 
-## 5. Character Analysis
+## 5. Character Analysis (HashMicro Test Case)
 
 ### Analyze Character Matching
 
@@ -484,8 +474,8 @@ Content-Type: application/json
     "input2": "Gallant Duck",
     "case_type": "sensitive",
     "result_percentage": 20,
-    "unique_chars": ["A", "B", "C", "D"],
-    "matched_chars": ["D"]
+    "unique_chars": "A, B, C, D",
+    "matched_chars": "D"
   }
 }
 ```
@@ -508,32 +498,22 @@ Content-Type: application/json
     "input2": "Gallant Duck",
     "case_type": "insensitive",
     "result_percentage": 60,
-    "unique_chars": ["A", "B", "C", "D"],
-    "matched_chars": ["A", "B", "D"]
+    "unique_chars": "A, B, C, D",
+    "matched_chars": "A, C, D"
   }
 }
 ```
 
 ### Algorithm Explanation
 
-```mermaid
-flowchart TD
-    A[Start] --> B[Get Unique Characters from Input1]
-    B --> C{For each char in unique chars}
-    C --> D{Check if char exists in Input2}
-    D -->|Case Sensitive| E[Exact Match]
-    D -->|Case Insensitive| F[Lowercase Match]
-    E --> G{Match Found?}
-    F --> G
-    G -->|Yes| H[Add to matched_chars]
-    G -->|No| I[Skip]
-    H --> J[Increment matched_count]
-    I --> C
-    J --> K{Check more chars?}
-    K -->|Yes| C
-    K -->|No| L[Calculate Percentage: matched_count / total_unique * 100]
-    L --> M[End]
-```
+1. Get unique characters from input1 (including duplicates count)
+2. For each character in input1, check if it exists in input2
+3. Case sensitive: exact match. Case insensitive: lowercase match
+4. Percentage = (matched count / total input1 length) * 100
+
+**Test Case Results:**
+- `"ABBCD"` vs `"Gallant Duck"` (sensitive): only 'D' matches = 1/5 = **20%**
+- `"ABBCD"` vs `"Gallant Duck"` (insensitive): 'A','C','D' match = 3/5 = **60%**
 
 ### Get Analysis History
 
@@ -552,17 +532,8 @@ X-API-TOKEN: <token>
       "input2": "Gallant Duck",
       "case_type": "sensitive",
       "result_percentage": 20,
-      "unique_chars": ["A", "B", "C", "D"],
-      "matched_chars": ["D"]
-    },
-    {
-      "id": 2,
-      "input1": "ABBCD",
-      "input2": "Gallant Duck",
-      "case_type": "insensitive",
-      "result_percentage": 60,
-      "unique_chars": ["A", "B", "C", "D"],
-      "matched_chars": ["A", "B", "D"]
+      "unique_chars": "A, B, C, D",
+      "matched_chars": "D"
     }
   ]
 }
@@ -580,6 +551,77 @@ X-API-TOKEN: <token>
 | 401 | Unauthorized |
 | 404 | Not Found |
 | 500 | Internal Server Error |
+
+---
+
+## Docker Deployment
+
+### Quick Start
+
+```bash
+# Build and run with Docker Compose
+docker compose up -d --build
+
+# Check services status
+docker compose ps
+
+# Health check
+curl http://localhost/health
+
+# API available at http://localhost
+# Swagger UI at http://localhost/api-docs/
+```
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        Host Machine                        │
+│                                                             │
+│   ┌──────────┐    ┌─────────────────┐    ┌─────────────┐   │
+│   │   curl   │───▶│     Nginx       │───▶│     App     │   │
+│   └──────────┘    │   Port: 80      │    │  Port:8081  │   │
+│   ┌──────────┐    └─────────────────┘    └──────┬──────┘   │
+│   │  MySQL   │◀─────────────────────────────▶│  Prisma   │   │
+│   │  Client  │                                │           │   │
+│   └──────────┘    ┌─────────────────┐         │           │   │
+│                   │   MySQL:8.0     │◀────────┘           │   │
+│                   │   Port: 3306    │                     │   │
+│                   └─────────────────┘                     │   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Services
+
+| Service | Port (Host) | Internal Port | Description |
+|---------|-------------|---------------|-------------|
+| nginx | 80 | 80 | Reverse proxy |
+| app | - | 8081 | Node.js API |
+| db | 3306 | 3306 | MySQL 8.0 |
+
+### Docker Commands
+
+```bash
+# Start services
+docker compose up -d
+
+# View logs
+docker compose logs -f app
+
+# Stop services
+docker compose down
+
+# Stop and remove data
+docker compose down -v
+```
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| PORT | 8081 | API server port |
+| DATABASE_URL | mysql://root:root@db:3306/hashmicro_hiring_test | MySQL connection string |
+| NODE_ENV | production | Environment mode |
 
 ---
 

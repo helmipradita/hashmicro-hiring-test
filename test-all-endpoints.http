@@ -8,7 +8,7 @@
 ###   4. Copy token dari response Login ke variable @token di bawah
 ### ============================================================
 
-@baseUrl = http://localhost:3000/api
+@baseUrl = http://localhost:8081/api
 @token = PASTE_TOKEN_FROM_LOGIN_RESPONSE_HERE
 
 ### ============================================================
