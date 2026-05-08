@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+.git
+*.md
+test
+doc
+manual-test.http
+test-all-endpoints.http
+.claude
+jest.config.js
+Dockerfile.dev
