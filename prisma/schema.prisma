@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique(map: "users_username_unique", length: 50)
+  password  String
+  name      String   @db.VarChar(100)
+  token     String?  @unique(map: "users_token_unique", length: 100)
+
+  employees       Employee[]
+  analysisResults AnalysisResult[]
+
+  @@map("users")
+}
+
+model Employee {
+  id         Int    @id @default(autoincrement())
+  first_name String @db.VarChar(100)
+  last_name  String @db.VarChar(100)
+  email      String @unique @db.VarChar(100)
+  phone      String @db.VarChar(20)
+  salary     Float
+  department String @db.VarChar(50)
+  position   String @db.VarChar(50)
+  user_id    Int
+
+  user          User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  salaryRecords SalaryRecord[]
+
+  @@map("employees")
+}
+
+model SalaryRecord {
+  id          Int    @id @default(autoincrement())
+  employee_id Int
+  base_salary Float
+  bonus       Float
+  tax         Float
+  deductions  Float
+  net_salary  Float
+  period      String @db.VarChar(20)
+
+  employee Employee @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+
+  @@map("salary_records")
+}
+
+model AnalysisResult {
+  id                Int    @id @default(autoincrement())
+  input1            String @db.VarChar(500)
+  input2            String @db.VarChar(500)
+  case_type         String @db.VarChar(20)
+  result_percentage Float
+  unique_chars      String @db.VarChar(500)
+  matched_chars     String @db.VarChar(500)
+  user_id           Int
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("analysis_results")
+}

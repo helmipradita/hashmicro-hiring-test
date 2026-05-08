@@ -1,0 +1,105 @@
+### Variables
+@baseUrl = http://localhost:3000/api
+@token = 72b1e62d-9348-43b4-9caa-bddd67df7772
+
+### Register
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+  "username": "admin123",
+  "password": "admin123",
+  "name": "Administrator"
+}
+
+### Login
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "username": "admin123",
+  "password": "admin123"
+}
+
+### Get Current User
+GET {{baseUrl}}/users/current
+X-API-TOKEN: {{token}}
+
+### Create Employee
+POST {{baseUrl}}/employees
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john3@example.com",
+  "phone": "081234567890",
+  "salary": 15000000,
+  "department": "Engineering",
+  "position": "Senior"
+}
+
+### List Employees
+GET {{baseUrl}}/employees?department=Engineering
+X-API-TOKEN: {{token}}
+
+### Get Employee
+GET {{baseUrl}}/employees/11
+X-API-TOKEN: {{token}}
+
+### Update Employee
+PATCH {{baseUrl}}/employees/11
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "salary": 25000000
+}
+
+### Delete Employee xDELETE {{baseUrl}}/employees/12
+X-API-TOKEN: {{token}}
+
+### Calculate Salary
+POST {{baseUrl}}/salaries/calculate
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "employee_id": 11,
+  "period": "2025-03"
+}
+
+### Get Salary History
+GET {{baseUrl}}/salaries/employee/11
+X-API-TOKEN: {{token}}
+
+### Analysis - Sensitive Case (Expected: 20%)
+POST {{baseUrl}}/analysis
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "input1": "ABBCD",
+  "input2": "Gallant Duck",
+  "case_type": "sensitive"
+}
+
+### Analysis - Non-Sensitive Case (Expected: 60%)
+POST {{baseUrl}}/analysis
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "input1": "ABBCD",
+  "input2": "Gallant Duck",
+  "case_type": "insensitive"
+}
+
+### Get Analysis History
+GET {{baseUrl}}/analysis/history
+X-API-TOKEN: {{token}}
+
+### Logout
+DELETE {{baseUrl}}/users/logout
+X-API-TOKEN: {{token}}

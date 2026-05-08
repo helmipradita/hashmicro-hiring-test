@@ -1,0 +1,817 @@
+### ============================================================
+### HASHMICRO HIRING TEST - COMPLETE MANUAL TEST FILE
+### ============================================================
+### Cara pakai:
+###   1. Buka file ini di VS Code (install extension "REST Client")
+###   2. Start server: npm run dev
+###   3. Jalankan request satu per satu dari atas ke bawah
+###   4. Copy token dari response Login ke variable @token di bawah
+### ============================================================
+
+@baseUrl = http://localhost:3000/api
+@token = PASTE_TOKEN_FROM_LOGIN_RESPONSE_HERE
+
+### ============================================================
+### 1. AUTH - REGISTER
+### ============================================================
+
+### TC-1.1 Register user baru - berhasil
+### Expected: 201 Created, response berisi username & name
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "name": "Administrator"
+}
+
+### TC-1.2 Register user yang sudah ada - gagal duplicate
+### Expected: 400 Bad Request, "Username already exists"
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "name": "Administrator"
+}
+
+### TC-1.3 Register tanpa username - gagal validasi
+### Expected: 400 Bad Request, validation error
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+  "password": "admin123",
+  "name": "Test"
+}
+
+### TC-1.4 Register password terlalu pendek (<6) - gagal validasi
+### Expected: 400 Bad Request, "Password must be at least 6 characters"
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+  "username": "user2",
+  "password": "123",
+  "name": "Short Password"
+}
+
+### TC-1.5 Register username terlalu pendek (<3) - gagal validasi
+### Expected: 400 Bad Request, "Username must be at least 3 characters"
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+  "username": "ab",
+  "password": "password123",
+  "name": "Short Username"
+}
+
+### ============================================================
+### 2. AUTH - LOGIN
+### ============================================================
+
+### TC-2.1 Login berhasil - dapat token
+### Expected: 200 OK, response berisi data user + token
+### *** COPY TOKEN DARI RESPONSE KE @token DI ATAS ***
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### TC-2.2 Login password salah - gagal
+### Expected: 401 Unauthorized, "Invalid username or password"
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "wrongpassword"
+}
+
+### TC-2.3 Login username tidak ada - gagal
+### Expected: 401 Unauthorized, "Invalid username or password"
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "username": "nonexistent",
+  "password": "password123"
+}
+
+### TC-2.4 Login tanpa field - gagal validasi
+### Expected: 400 Bad Request, validation error
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "username": "admin"
+}
+
+### ============================================================
+### 3. USER - GET CURRENT (Protected)
+### ============================================================
+
+### TC-3.1 Get current user - berhasil
+### Expected: 200 OK, response berisi username & name
+GET {{baseUrl}}/users/current
+X-API-TOKEN: {{token}}
+
+### TC-3.2 Get current user tanpa token - gagal
+### Expected: 401 Unauthorized, "Token is required"
+GET {{baseUrl}}/users/current
+
+### TC-3.3 Get current user token salah - gagal
+### Expected: 401 Unauthorized, "Invalid token"
+GET {{baseUrl}}/users/current
+X-API-TOKEN: invalid-token-here
+
+### ============================================================
+### 4. USER - UPDATE (Protected)
+### ============================================================
+
+### TC-4.1 Update nama user - berhasil
+### Expected: 200 OK, response berisi nama baru
+PATCH {{baseUrl}}/users/current
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "name": "Admin Updated"
+}
+
+### TC-4.2 Update password user - berhasil
+### Expected: 200 OK
+PATCH {{baseUrl}}/users/current
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "password": "admin123"
+}
+
+### TC-4.3 Update nama kosong - gagal
+### Expected: 400 Bad Request, "Name cannot be empty"
+PATCH {{baseUrl}}/users/current
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "name": ""
+}
+
+### ============================================================
+### 5. EMPLOYEE - CREATE (CRUD: Create)
+### ============================================================
+
+### TC-5.1 Create employee Engineering Senior - berhasil
+### Expected: 201 Created, response berisi data employee
+POST {{baseUrl}}/employees
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john.doe@example.com",
+  "phone": "081234567890",
+  "salary": 15000000,
+  "department": "Engineering",
+  "position": "Senior"
+}
+
+### TC-5.2 Create employee Marketing Junior - berhasil
+### Expected: 201 Created
+POST {{baseUrl}}/employees
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "email": "jane.smith@example.com",
+  "phone": "081234567891",
+  "salary": 7000000,
+  "department": "Marketing",
+  "position": "Junior"
+}
+
+### TC-5.3 Create employee Finance Manager - berhasil
+### Expected: 201 Created
+POST {{baseUrl}}/employees
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "Bob",
+  "last_name": "Wilson",
+  "email": "bob.wilson@example.com",
+  "phone": "081234567892",
+  "salary": 45000000,
+  "department": "Finance",
+  "position": "Manager"
+}
+
+### TC-5.4 Create employee HR Middle - berhasil
+### Expected: 201 Created
+POST {{baseUrl}}/employees
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "Alice",
+  "last_name": "Brown",
+  "email": "alice.brown@example.com",
+  "phone": "081234567893",
+  "salary": 12000000,
+  "department": "HR",
+  "position": "Middle"
+}
+
+### TC-5.5 Create employee Sales Lead - berhasil
+### Expected: 201 Created
+POST {{baseUrl}}/employees
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "Charlie",
+  "last_name": "Davis",
+  "email": "charlie.davis@example.com",
+  "phone": "081234567894",
+  "salary": 35000000,
+  "department": "Sales",
+  "position": "Lead"
+}
+
+### TC-5.6 Create employee department invalid - gagal
+### Expected: 400 Bad Request, "Invalid department"
+POST {{baseUrl}}/employees
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "Test",
+  "last_name": "User",
+  "email": "test@example.com",
+  "phone": "081234567899",
+  "salary": 10000000,
+  "department": "InvalidDept",
+  "position": "Junior"
+}
+
+### TC-5.7 Create employee salary di bawah range - gagal
+### Expected: 400 Bad Request, salary range error
+POST {{baseUrl}}/employees
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "Test",
+  "last_name": "Low",
+  "email": "testlow@example.com",
+  "phone": "081234567895",
+  "salary": 1000000,
+  "department": "Engineering",
+  "position": "Senior"
+}
+
+### TC-5.8 Create employee email invalid - gagal validasi
+### Expected: 400 Bad Request, "Invalid email format"
+POST {{baseUrl}}/employees
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "Test",
+  "last_name": "Email",
+  "email": "not-an-email",
+  "phone": "081234567896",
+  "salary": 10000000,
+  "department": "Engineering",
+  "position": "Middle"
+}
+
+### TC-5.9 Create employee salary negatif - gagal validasi
+### Expected: 400 Bad Request, "Salary must be positive"
+POST {{baseUrl}}/employees
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "Test",
+  "last_name": "Negative",
+  "email": "negative@example.com",
+  "phone": "081234567897",
+  "salary": -10000000,
+  "department": "Engineering",
+  "position": "Middle"
+}
+
+### TC-5.10 Create employee tanpa field required - gagal validasi
+### Expected: 400 Bad Request, validation error
+POST {{baseUrl}}/employees
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "Only Name"
+}
+
+### ============================================================
+### 6. EMPLOYEE - READ/LIST (CRUD: Read)
+### ============================================================
+
+### TC-6.1 List semua employees - berhasil
+### Expected: 200 OK, response berisi data + paging
+GET {{baseUrl}}/employees
+X-API-TOKEN: {{token}}
+
+### TC-6.2 List employees filter department Engineering
+### Expected: 200 OK, hanya employees dari Engineering
+GET {{baseUrl}}/employees?department=Engineering
+X-API-TOKEN: {{token}}
+
+### TC-6.3 List employees filter department Marketing
+### Expected: 200 OK, hanya employees dari Marketing
+GET {{baseUrl}}/employees?department=Marketing
+X-API-TOKEN: {{token}}
+
+### TC-6.4 List employees search by name "John"
+### Expected: 200 OK, hanya John Doe
+GET {{baseUrl}}/employees?name=John
+X-API-TOKEN: {{token}}
+
+### TC-6.5 List employees filter position Senior
+### Expected: 200 OK, hanya Senior positions
+GET {{baseUrl}}/employees?position=Senior
+X-API-TOKEN: {{token}}
+
+### TC-6.6 List employees search by email
+### Expected: 200 OK, hanya yang email-nya match
+GET {{baseUrl}}/employees?email=jane
+X-API-TOKEN: {{token}}
+
+### TC-6.7 List employees pagination page 1 size 2
+### Expected: 200 OK, hanya 2 data, total_page = ceil(total/2)
+GET {{baseUrl}}/employees?page=1&size=2
+X-API-TOKEN: {{token}}
+
+### TC-6.8 List employees pagination page 2 size 2
+### Expected: 200 OK, data page 2
+GET {{baseUrl}}/employees?page=2&size=2
+X-API-TOKEN: {{token}}
+
+### TC-6.9 Get employee by ID 1 - berhasil
+### Expected: 200 OK, data John Doe
+GET {{baseUrl}}/employees/1
+X-API-TOKEN: {{token}}
+
+### TC-6.10 Get employee by ID tidak ada - gagal
+### Expected: 404 Not Found, "Employee not found"
+GET {{baseUrl}}/employees/9999
+X-API-TOKEN: {{token}}
+
+### ============================================================
+### 7. EMPLOYEE - UPDATE (CRUD: Update)
+### ============================================================
+
+### TC-7.1 Update salary employee - berhasil
+### Expected: 200 OK, salary berubah jadi 20000000
+PATCH {{baseUrl}}/employees/1
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "salary": 20000000
+}
+
+### TC-7.2 Update department employee - berhasil
+### Expected: 200 OK, department berubah
+PATCH {{baseUrl}}/employees/1
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "department": "Engineering"
+}
+
+### TC-7.3 Update multiple fields sekaligus - berhasil
+### Expected: 200 OK, semua field berubah
+PATCH {{baseUrl}}/employees/2
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "Janet",
+  "last_name": "Williams",
+  "salary": 8000000
+}
+
+### TC-7.4 Update email invalid - gagal
+### Expected: 400 Bad Request, "Invalid email format"
+PATCH {{baseUrl}}/employees/1
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "email": "bad-email"
+}
+
+### TC-7.5 Update salary negatif - gagal
+### Expected: 400 Bad Request, "Salary must be positive"
+PATCH {{baseUrl}}/employees/1
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "salary": -5000000
+}
+
+### TC-7.6 Update first name kosong - gagal
+### Expected: 400 Bad Request, "First name cannot be empty"
+PATCH {{baseUrl}}/employees/1
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "first_name": ""
+}
+
+### TC-7.7 Update employee yang tidak ada - gagal
+### Expected: 404 Not Found, "Employee not found"
+PATCH {{baseUrl}}/employees/9999
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "salary": 10000000
+}
+
+### ============================================================
+### 8. EMPLOYEE - DELETE (CRUD: Delete)
+### ============================================================
+
+### TC-8.1 Buat employee khusus untuk delete
+POST {{baseUrl}}/employees
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "ToDelete",
+  "last_name": "User",
+  "email": "delete.me@example.com",
+  "phone": "081234567898",
+  "salary": 5000000,
+  "department": "Operations",
+  "position": "Junior"
+}
+
+### TC-8.2 Delete employee yang baru dibuat - berhasil
+### Expected: 200 OK, "OK"
+### *** GANTI ID SESUAI RESPONSE TC-8.1 ***
+DELETE {{baseUrl}}/employees/6
+X-API-TOKEN: {{token}}
+
+### TC-8.3 Delete employee yang sudah dihapus - gagal
+### Expected: 404 Not Found, "Employee not found"
+DELETE {{baseUrl}}/employees/6
+X-API-TOKEN: {{token}}
+
+### TC-8.4 Delete employee ID tidak ada - gagal
+### Expected: 404 Not Found, "Employee not found"
+DELETE {{baseUrl}}/employees/9999
+X-API-TOKEN: {{token}}
+
+### ============================================================
+### 9. SALARY - CALCULATE (Mathematics)
+### ============================================================
+
+### TC-9.1 Calculate salary Engineering Senior - berhasil
+### Expected: 200 OK, base 20M + bonus - tax - deductions = net salary
+POST {{baseUrl}}/salaries/calculate
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "employee_id": 1,
+  "period": "2024-01"
+}
+
+### TC-9.2 Calculate salary Marketing Junior - berhasil
+### Expected: 200 OK, bonus rate berbeda dari Engineering
+POST {{baseUrl}}/salaries/calculate
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "employee_id": 2,
+  "period": "2024-02"
+}
+
+### TC-9.3 Calculate salary Finance Manager - berhasil
+### Expected: 200 OK, bonus besar (Finance 12% * Manager 1.8)
+POST {{baseUrl}}/salaries/calculate
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "employee_id": 3,
+  "period": "2024-03"
+}
+
+### TC-9.4 Calculate salary employee tidak ada - gagal
+### Expected: 404 Not Found, "Employee not found"
+POST {{baseUrl}}/salaries/calculate
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "employee_id": 9999,
+  "period": "2024-01"
+}
+
+### TC-9.5 Calculate salary tanpa period - gagal validasi
+### Expected: 400 Bad Request, "Period is required"
+POST {{baseUrl}}/salaries/calculate
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "employee_id": 1
+}
+
+### TC-9.6 Get salary history employee 1 - berhasil
+### Expected: 200 OK, list semua salary records employee 1
+GET {{baseUrl}}/salaries/employee/1
+X-API-TOKEN: {{token}}
+
+### TC-9.7 Get salary history employee 2 - berhasil
+### Expected: 200 OK, list salary records employee 2
+GET {{baseUrl}}/salaries/employee/2
+X-API-TOKEN: {{token}}
+
+### TC-9.8 Get salary history employee tidak ada - gagal
+### Expected: 404 Not Found, "Employee not found"
+GET {{baseUrl}}/salaries/employee/9999
+X-API-TOKEN: {{token}}
+
+### ============================================================
+### 10. CHARACTER ANALYSIS - Soal HashMicro
+### ============================================================
+
+### TC-10.1 SOAL CASE 1 - Sensitive Case
+### Input1: "ABBCD" (5 karakter)
+### Input2: "Gallant Duck"
+### Karakter unique ABBCD: A, B, C, D (4 unique)
+### Sensitive: hanya 'D' yang ada di "Gallant Duck"
+### Expected: 1/5 = 20%
+POST {{baseUrl}}/analysis
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "input1": "ABBCD",
+  "input2": "Gallant Duck",
+  "case_type": "sensitive"
+}
+
+### TC-10.2 SOAL CASE 2 - Non-Sensitive Case
+### Input1: "ABBCD" (5 karakter)
+### Input2: "Gallant Duck"
+### Insensitive: 'A' (a), 'C' (c), 'D' (D) ada di "Gallant Duck"
+### 'B' (b) TIDAK ada di "Gallant Duck"
+### Expected: 3/5 = 60%
+POST {{baseUrl}}/analysis
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "input1": "ABBCD",
+  "input2": "Gallant Duck",
+  "case_type": "insensitive"
+}
+
+### TC-10.3 Analysis - Semua karakter match (sensitive)
+### Input1: "HELLO" → unique: H, E, L, O
+### Input2: "HELLO WORLD"
+### Sensitive: H, E, L, O semua ada
+### Expected: 4/5 = 80%
+POST {{baseUrl}}/analysis
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "input1": "HELLO",
+  "input2": "HELLO WORLD",
+  "case_type": "sensitive"
+}
+
+### TC-10.4 Analysis - Tidak ada yang match
+### Input1: "XYZ"
+### Input2: "Hello World"
+### Sensitive: X, Y, Z tidak ada di "Hello World"
+### Expected: 0/3 = 0%
+POST {{baseUrl}}/analysis
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "input1": "XYZ",
+  "input2": "Hello World",
+  "case_type": "sensitive"
+}
+
+### TC-10.5 Analysis - Case berbeda sensitive vs insensitive
+### Input1: "abc"
+### Input2: "ABC"
+### Sensitive: a≠A, b≠B, c≠C → 0/3 = 0%
+### Expected: 0%
+POST {{baseUrl}}/analysis
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "input1": "abc",
+  "input2": "ABC",
+  "case_type": "sensitive"
+}
+
+### TC-10.6 Analysis - Case berbeda insensitive
+### Input1: "abc"
+### Input2: "ABC"
+### Insensitive: a=A, b=B, c=C → 3/3 = 100%
+### Expected: 100%
+POST {{baseUrl}}/analysis
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "input1": "abc",
+  "input2": "ABC",
+  "case_type": "insensitive"
+}
+
+### TC-10.7 Analysis - Input1 kosong - gagal validasi
+### Expected: 400 Bad Request, "Input 1 is required"
+POST {{baseUrl}}/analysis
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "input1": "",
+  "input2": "Hello",
+  "case_type": "sensitive"
+}
+
+### TC-10.8 Analysis - Case type invalid - gagal validasi
+### Expected: 400 Bad Request, "Case type must be 'sensitive' or 'insensitive'"
+POST {{baseUrl}}/analysis
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "input1": "ABC",
+  "input2": "Hello",
+  "case_type": "invalid"
+}
+
+### TC-10.9 Analysis - Karakter dengan spasi dan simbol
+### Input1: "A@B C"
+### Input2: "a@b c test"
+### Insensitive: A=a, @=@, B=b, space=space, C=c → semua match
+### Expected: 5/5 = 100%
+POST {{baseUrl}}/analysis
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "input1": "A@B C",
+  "input2": "a@b c test",
+  "case_type": "insensitive"
+}
+
+### TC-10.10 Analysis - Angka sebagai karakter
+### Input1: "123"
+### Input2: "a1b2c3"
+### Sensitive: 1, 2, 3 semua ada
+### Expected: 3/3 = 100%
+POST {{baseUrl}}/analysis
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "input1": "123",
+  "input2": "a1b2c3",
+  "case_type": "sensitive"
+}
+
+### TC-10.11 Analysis - Duplicate chars di input1
+### Input1: "AAA" (3 karakter, 1 unique: A)
+### Input2: "Apple"
+### Sensitive: A ada di "Apple"
+### Expected: 1/3 = 33% (dibulatkan)
+POST {{baseUrl}}/analysis
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "input1": "AAA",
+  "input2": "Apple",
+  "case_type": "sensitive"
+}
+
+### TC-10.12 Analysis - Input2 lebih pendek dari input1
+### Input1: "ABCDE"
+### Input2: "A"
+### Sensitive: hanya A match
+### Expected: 1/5 = 20%
+POST {{baseUrl}}/analysis
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "input1": "ABCDE",
+  "input2": "A",
+  "case_type": "sensitive"
+}
+
+### ============================================================
+### 11. ANALYSIS HISTORY
+### ============================================================
+
+### TC-11.1 Get analysis history - berhasil
+### Expected: 200 OK, list semua analysis yang pernah dilakukan
+GET {{baseUrl}}/analysis/history
+X-API-TOKEN: {{token}}
+
+### ============================================================
+### 12. EDGE CASES & SECURITY
+### ============================================================
+
+### TC-12.1 Akses protected endpoint tanpa token
+### Expected: 401 Unauthorized
+GET {{baseUrl}}/employees
+X-API-TOKEN:
+
+### TC-12.2 Akses protected endpoint dengan token expired/salah
+### Expected: 401 Unauthorized
+GET {{baseUrl}}/employees
+X-API-TOKEN: fake-token-12345
+
+### TC-12.3 Create employee email duplicate - gagal
+### Expected: 400 Bad Request, "employees_email_key already exists"
+POST {{baseUrl}}/employees
+X-API-TOKEN: {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "Duplicate",
+  "last_name": "Email",
+  "email": "john.doe@example.com",
+  "phone": "081999999999",
+  "salary": 10000000,
+  "department": "Engineering",
+  "position": "Junior"
+}
+
+### TC-12.4 Body bukan JSON - gagal
+### Expected: 400 atau parse error
+POST {{baseUrl}}/employees
+X-API-TOKEN: {{token}}
+Content-Type: text/plain
+
+bukan json
+
+### ============================================================
+### 13. LOGOUT
+### ============================================================
+
+### TC-13.1 Logout - berhasil
+### Expected: 200 OK, "OK"
+### Setelah ini token tidak bisa dipakai lagi
+DELETE {{baseUrl}}/users/logout
+X-API-TOKEN: {{token}}
+
+### TC-13.2 Akses endpoint setelah logout - gagal
+### Expected: 401 Unauthorized, "Invalid token"
+GET {{baseUrl}}/users/current
+X-API-TOKEN: {{token}}
+
+### ============================================================
+### 14. RE-LOGIN (untuk lanjut test jika perlu)
+### ============================================================
+
+### TC-14.1 Login ulang untuk mendapat token baru
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
