@@ -3,3 +3,8 @@ node_modules
 dist
 .env
 *.log
+coverage/
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
