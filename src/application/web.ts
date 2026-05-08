@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import publicApi from "../route/public-api";
 import api from "../route/api";
@@ -6,6 +7,7 @@ import { errorMiddleware } from "../middleware/error-middleware";
 import { swaggerSpec } from "./swagger";
 
 export const web = express();
+web.use(cors());
 web.use(express.json());
 
 web.get("/health", (req, res) => {
