@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hashmicro-app
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=mysql://root:root@localhost:3306/hashmicro_hiring_test
+      - PORT=8081
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - hashmicro-net
+    command: >
+      sh -c "
+        npx prisma migrate deploy || true &&
+        npx prisma generate &&
+        node dist/main.js
+      "
+
+  db:
+    image: mysql:8.0
+    container_name: hashmicro-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=hashmicro_hiring_test
+    ports:
+      - "3306:3306"
+    volumes:
+      - hashmicro-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - hashmicro-net
+
+networks:
+  hashmicro-net:
+    driver: bridge
+
+volumes:
+  hashmicro-db-data:
