@@ -5,8 +5,6 @@ services:
       dockerfile: Dockerfile
     container_name: hashmicro-app
     restart: unless-stopped
-    ports:
-      - "8081:8081"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=mysql://root:root@db:3306/hashmicro_hiring_test
@@ -38,6 +36,19 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - hashmicro-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: hashmicro-nginx
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
     networks:
       - hashmicro-net
 
