@@ -19,8 +19,8 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: "http://localhost:8081/api",
-        description: "Local Development Server",
+        url: "http://hashmicro.helmipradita.dev/api",
+        description: "Production Server",
       },
     ],
     components: {
